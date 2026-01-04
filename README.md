@@ -58,12 +58,49 @@ Process these 3 tasks via a nested subagent that delegates to its own subagents.
 
 ## Why Use This?
 
-Claude Code's native Task tool **blocks subagents from spawning other subagents**. This plugin bypasses that limitation by spawning fresh `claude -p` processes - each one is a new main agent with full tool access.
+Claude Code's native Task tool **blocks subagents from spawning other subagents**:
+
+```typescript
+// src/tools/AgentTool/prompt.ts - the recursion blocker
+.filter(_ => _.name !== AgentTool.name)
+```
+
+This plugin bypasses that limitation by spawning fresh `claude -p` processes - each one is a new main agent with full tool access.
 
 ```
 Native Task:     Main → Subagent → BLOCKED
 This Plugin:     Main → Nested → Fresh Main → Subagent → Works!
 ```
+
+---
+
+## Feature Parity with Native Task
+
+| Feature | Native Task | This Plugin | Status |
+|---------|-------------|-------------|--------|
+| **Can spawn sub-sub-agents** | ❌ Blocked | ✅ Yes | **The reason this exists** |
+| **Context isolation** | Shared | ✅ Fresh 200k | ✅ Implemented |
+| **Real-time progress** | yield* | MCP notifications | ✅ Implemented |
+| **Tool use counting** | ✅ | ✅ | ✅ Implemented |
+| **Token tracking** | ✅ | ✅ | ✅ Implemented |
+| **Cost tracking** | ✅ | ✅ | ✅ Implemented |
+| **Abort/cancel** | AbortController | SIGTERM/SIGKILL | ✅ Implemented |
+| **Configurable model** | ❌ | ✅ | ✅ Implemented |
+| **Configurable timeout** | ❌ | ✅ | ✅ Implemented |
+| **System prompt control** | ❌ | ✅ | ✅ Implemented |
+| **Tool restrictions** | ❌ | ✅ allowedTools/disallowedTools | ✅ Implemented |
+| **Budget limits** | ❌ | ✅ maxBudgetUsd | ✅ Implemented |
+| **Resume support** | ✅ --resume | ❌ | 🔲 Planned |
+| **Background execution** | ✅ run_in_background | ❌ | 🔲 Planned |
+| **Normalized messages** | ✅ Full tree | Text only | 🔲 Planned |
+| **Sidechain logging** | ✅ .claude/logs | ❌ | 🔲 Planned |
+| **Task aggregation** | N/A | ❌ | 🔲 Planned |
+
+### Legend
+
+- ✅ Implemented
+- 🔲 Planned
+- ❌ Not available
 
 ## Tool Reference
 
