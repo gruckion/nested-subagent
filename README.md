@@ -1,9 +1,12 @@
-# Nested Subagent Plugin
+# nested-subagent
 
-![Claude Code](https://img.shields.io/badge/Claude%20Code-Plugin-blue?style=flat-square)
-![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-v1.0.33+-blue.svg)](https://docs.anthropic.com/en/docs/claude-code)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/gruckion/nested-subagent/pulls)
 
 Enable **unlimited nested subagents** in Claude Code. Subagents can spawn their own subagents.
+
+---
 
 ## Quick Start
 
@@ -83,4 +86,4 @@ For deep technical details on how this works, see [ARCHITECTURE.md](./ARCHITECTU
 
 ## License
 
-MIT
+MIT - see [LICENSE](./LICENSE) for details.
