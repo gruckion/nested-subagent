@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "subagent": {
+      "command": "npx",
+      "args": ["tsx", "${CLAUDE_PLUGIN_ROOT}/mcp-server/src/index.ts"],
+      "cwd": "${CLAUDE_PLUGIN_ROOT}"
+    }
+  }
+}
