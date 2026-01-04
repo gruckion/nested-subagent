@@ -42,18 +42,18 @@ claude --plugin-dir /path/to/nested-subagent
 
 ## Usage
 
-Just add "via a nested subagent" to your prompts:
+Claude automatically uses the nested subagent tool when your task requires multi-level delegation:
 
 ```
-Print numbers 1-10 using node CLI via a nested subagent.
-```
-
-```
-Build a math utility via a nested subagent. Use subagents for verify, plan, code steps.
+Build a math utility that needs its own subagents for verify, plan, and code steps.
 ```
 
 ```
-Process these 3 tasks via a nested subagent that delegates to its own subagents.
+Process these issues where each issue handler spawns specialized workers.
+```
+
+```
+Run a workflow that delegates to sub-sub-agents for parallel execution.
 ```
 
 ## Why Use This?
@@ -65,12 +65,22 @@ Claude Code's native Task tool **blocks subagents from spawning other subagents*
 .filter(_ => _.name !== AgentTool.name)
 ```
 
-This plugin bypasses that limitation by spawning fresh `claude -p` processes - each one is a new main agent with full tool access.
+This plugin works around that limitation using the official `claude -p` headless mode. Each spawned process runs as an isolated main agent with the same capabilities as your interactive session - including the ability to use the native Task tool.
 
 ```
-Native Task:     Main → Subagent → BLOCKED
-This Plugin:     Main → Nested → Fresh Main → Subagent → Works!
+Native Task:     Main → Subagent → BLOCKED (Task tool filtered out)
+This Plugin:     Main → Nested → Isolated Main → Subagent → ✓
 ```
+
+### How It Works
+
+The plugin spawns `claude -p` with `--output-format stream-json` to get real-time progress, matching the native Task tool's behavior:
+
+```bash
+claude -p "your task" --output-format stream-json --verbose --model sonnet
+```
+
+This is the same approach as the [Claude Agent SDK](https://docs.anthropic.com/en/docs/claude-code/sdk) - spawning isolated Claude processes programmatically.
 
 ---
 
@@ -78,17 +88,17 @@ This Plugin:     Main → Nested → Fresh Main → Subagent → Works!
 
 | Feature | Native Task | This Plugin | Status |
 |---------|-------------|-------------|--------|
-| **Can spawn sub-sub-agents** | ❌ Blocked | ✅ Yes | **The reason this exists** |
-| **Context isolation** | Shared | ✅ Fresh 200k | ✅ Implemented |
-| **Real-time progress** | yield* | MCP notifications | ✅ Implemented |
+| **Can spawn sub-sub-agents** | ❌ Blocked | ✅ Yes | **Why this exists** |
+| **Context isolation** | Shared | ✅ Fresh 200k window | ✅ Implemented |
+| **Real-time progress** | Generator yields | MCP notifications | ✅ Implemented |
 | **Tool use counting** | ✅ | ✅ | ✅ Implemented |
 | **Token tracking** | ✅ | ✅ | ✅ Implemented |
 | **Cost tracking** | ✅ | ✅ | ✅ Implemented |
-| **Abort/cancel** | AbortController | SIGTERM/SIGKILL | ✅ Implemented |
-| **Configurable model** | ❌ | ✅ | ✅ Implemented |
+| **Abort / cancel** | AbortController | SIGTERM / SIGKILL | ✅ Implemented |
+| **Configurable model** | ❌ | ✅ sonnet / opus / haiku | ✅ Implemented |
 | **Configurable timeout** | ❌ | ✅ | ✅ Implemented |
-| **System prompt control** | ❌ | ✅ | ✅ Implemented |
-| **Tool restrictions** | ❌ | ✅ allowedTools/disallowedTools | ✅ Implemented |
+| **System prompt control** | ❌ | ✅ Full control | ✅ Implemented |
+| **Tool restrictions** | ❌ | ✅ allowed / disallowed | ✅ Implemented |
 | **Budget limits** | ❌ | ✅ maxBudgetUsd | ✅ Implemented |
 | **Resume support** | ✅ --resume | ❌ | 🔲 Planned |
 | **Background execution** | ✅ run_in_background | ❌ | 🔲 Planned |
