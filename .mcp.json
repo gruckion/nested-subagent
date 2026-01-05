@@ -1,8 +1,6 @@
 {
-  "mcpServers": {
-    "subagent": {
-      "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.mjs"]
-    }
+  "subagent": {
+    "command": "node",
+    "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.mjs"]
   }
 }
