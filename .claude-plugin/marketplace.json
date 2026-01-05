@@ -1,16 +1,24 @@
 {
-  "name": "nested-subagent",
+  "name": "fallback-agent",
   "owner": {
     "name": "gruckion"
   },
   "metadata": {
-    "description": "Enable unlimited nested subagents in Claude Code"
+    "description": "Fallback agent with full tool access for unlimited nesting"
   },
   "plugins": [
     {
-      "name": "nested",
+      "name": "fallback",
       "source": "./",
-      "description": "Enable nested subagents by spawning fresh Claude processes. Provides an MCP tool that bypasses the native Task tool's recursion limit, allowing subagents to spawn their own subagents."
+      "description": "Fallback agent that spawns fresh Claude processes with full tool access. Bypasses the native Task tool's recursion limit, enabling unlimited nesting.",
+      "version": "1.0.3",
+      "mcpServers": {
+        "fallback": {
+          "command": "node",
+          "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.mjs"]
+        }
+      },
+      "strict": false
     }
   ]
 }

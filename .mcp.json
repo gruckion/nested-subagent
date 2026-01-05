@@ -1,6 +1,8 @@
 {
-  "subagent": {
-    "command": "node",
-    "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.mjs"]
+  "mcpServers": {
+    "fallback": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/mcp-server/dist/index.mjs"]
+    }
   }
 }

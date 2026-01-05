@@ -39,8 +39,6 @@ claude --plugin-dir /path/to/nested-subagent
 | Component | Name | Description |
 |-----------|------|-------------|
 | MCP Tool | `Task` | Spawns isolated Claude processes with full tool access |
-| Agent | `nested-task` | Orchestrates nested subagent workflows |
-| Skill | `nested-subagent` | Model-invoked capability for multi-level nesting |
 
 ## Example
 

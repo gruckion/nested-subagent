@@ -1,7 +1,7 @@
 {
-  "name": "nested-subagent-mcp",
+  "name": "fallback-agent-mcp",
   "version": "1.0.0",
-  "description": "MCP server that enables nested subagents by spawning fresh Claude processes",
+  "description": "MCP server that provides a fallback agent by spawning fresh Claude processes",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

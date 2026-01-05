@@ -1,6 +1,6 @@
-# Testing the Nested Subagent Plugin
+# Testing the Fallback Agent Plugin
 
-This directory contains tests for the nested-subagent MCP plugin.
+This directory contains tests for the fallback-agent MCP plugin.
 
 ## Test Types
 
@@ -69,7 +69,7 @@ test/
 ├── helpers/
 │   └── claude-cli.ts          # Claude CLI spawning utilities
 ├── helpers.test.ts            # Unit tests for helpers (free)
-├── nested-subagent.integration.test.ts  # Full integration tests (costs $)
+├── basic-nesting.integration.test.ts    # Full integration tests (costs $)
 └── README.md
 ```
 

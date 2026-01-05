@@ -54,7 +54,7 @@ Write the final module to ${testFile}. Return a summary of completed tasks.`,
     // Check that nested subagent was used
     const nestedCalls = result.toolUses.filter(
       (tu) =>
-        tu.name === "mcp__plugin_nested_subagent__Task" ||
+        tu.name === "mcp__plugin_fallback_agent__Task" ||
         tu.name.includes("nested") ||
         tu.name.includes("subagent")
     );

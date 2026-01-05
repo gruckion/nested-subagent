@@ -13087,9 +13087,9 @@ var StdioServerTransport = class {
 //#endregion
 //#region src/index.ts
 /**
-* Nested Subagent MCP Server - Streaming Edition
+* Fallback Agent MCP Server - Streaming Edition
 *
-* This MCP server enables nested subagents by spawning fresh Claude processes
+* This MCP server provides a fallback agent by spawning fresh Claude processes
 * with REAL-TIME progress streaming using MCP progress notifications.
 *
 * KEY FEATURES:
@@ -13112,7 +13112,7 @@ var StdioServerTransport = class {
 *             └── Returns final result when complete
 * ```
 */
-const LOG_FILE = "/tmp/nested-subagent-debug.log";
+const LOG_FILE = "/tmp/fallback-agent-debug.log";
 function log(message) {
 	const logLine = `[${(/* @__PURE__ */ new Date()).toISOString()}] ${message}\n`;
 	try {
@@ -13120,19 +13120,23 @@ function log(message) {
 	} catch {}
 }
 try {
-	writeFileSync(LOG_FILE, `=== Nested Subagent MCP Server Started ===\n`);
+	writeFileSync(LOG_FILE, `=== Fallback Agent MCP Server Started ===\n`);
+	appendFileSync(LOG_FILE, `CLAUDE_PLUGIN_ROOT=${process.env.CLAUDE_PLUGIN_ROOT || "(not set)"}\n`);
 } catch {}
 const NESTED_TASK_TOOL = {
 	name: "Task",
-	description: `Launch a new task in an isolated context. Unlike the native Task tool, this can spawn nested subagents.
+	description: `Launch a new agent that has access to all tools including Task. When you are searching for a keyword or file and are not confident that you will find the right match on the first try, use the Agent tool to perform the search for you. For example:
 
-The spawned task runs as a FRESH main agent with its own 200k context window.
-It CAN use the native Task tool to spawn its own subagents (enables multi-level nesting).
+- If you are searching for a keyword like "config" or "logger", the Agent tool is appropriate
+- If you want to read a specific file path, use the Read or Glob tool instead of the Agent tool, to find the match more quickly
+- If you are searching for a specific class definition like "class Foo", use the Glob tool instead, to find the match more quickly
 
-Use this when you need to:
-- Delegate tasks that require their own subagents
-- Isolate context-heavy operations
-- Enable multi-level agent orchestration`,
+Usage notes:
+1. Launch multiple agents concurrently whenever possible, to maximize performance; to do that, use a single message with multiple tool uses
+2. When the agent is done, it will return a single message back to you. The result returned by the agent is not visible to the user. To show the user the result, you should send a text message back to the user with a concise summary of the result.
+3. Each agent invocation is stateless. You will not be able to send additional messages to the agent, nor will the agent be able to communicate with you outside of its final report. Therefore, your prompt should contain a highly detailed task description for the agent to perform autonomously and you should specify exactly what information the agent should return back to you in its final and only message to you.
+4. The agent's outputs should generally be trusted
+5. IMPORTANT: The spawned agent runs as a fresh process with its own 200k context window and CAN use the Task tool.`,
 	inputSchema: {
 		type: "object",
 		properties: {
@@ -13210,7 +13214,7 @@ Use this when you need to:
 	}
 };
 const server = new Server({
-	name: "nested-subagent",
+	name: "fallback-agent",
 	version: "2.0.0"
 }, { capabilities: { tools: {} } });
 const activeProcesses = /* @__PURE__ */ new Map();
@@ -13258,10 +13262,13 @@ async function runTask(input, progressToken) {
 	if (maxBudgetUsd !== void 0) args.push("--max-budget-usd", String(maxBudgetUsd));
 	if (addDirs && addDirs.length > 0) args.push("--add-dir", ...addDirs);
 	args.push("--no-session-persistence");
+	const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+	if (pluginRoot) args.push("--plugin-dir", pluginRoot);
 	return new Promise((resolve) => {
 		let lastResult = null;
 		let timedOut = false;
 		const processId = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+		log(`[${processId}] CLAUDE_PLUGIN_ROOT=${process.env.CLAUDE_PLUGIN_ROOT || "(not set)"}`);
 		log(`[${processId}] Spawning claude with args: ${JSON.stringify(args)}`);
 		log(`[${processId}] Working dir: ${workingDir}`);
 		const proc = spawn("claude", args, {
@@ -13471,7 +13478,7 @@ process.on("SIGINT", () => {
 async function main() {
 	const transport = new StdioServerTransport();
 	await server.connect(transport);
-	console.error("Nested Subagent MCP Server v2.0 (streaming) running on stdio");
+	console.error("Fallback Agent MCP Server v2.0 (streaming) running on stdio");
 }
 main().catch((error) => {
 	console.error("Fatal error:", error);

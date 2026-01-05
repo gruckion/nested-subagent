@@ -120,13 +120,6 @@ nested-subagent/
 ├── .claude-plugin/
 │   └── plugin.json              # Plugin manifest (name: "nested")
 ├── .mcp.json                    # MCP server configuration
-├── agents/
-│   └── nested-task.md           # Agent definition
-├── skills/
-│   └── nested-subagent/
-│       └── SKILL.md             # Model-invoked skill
-├── commands/
-│   └── spawn.md                 # /nested:spawn command
 ├── mcp-server/
 │   ├── package.json
 │   ├── tsconfig.json

@@ -1,5 +1,0 @@
-{
-  "name": "nested",
-  "description": "Enable nested subagents by spawning fresh Claude processes. Provides an MCP tool that bypasses the native Task tool's recursion limit, allowing subagents to spawn their own subagents.",
-  "version": "1.0.3"
-}
