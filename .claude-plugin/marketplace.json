@@ -1,10 +1,15 @@
 {
   "name": "nested-subagent",
-  "description": "Enable unlimited nested subagents in Claude Code",
+  "owner": {
+    "name": "gruckion"
+  },
+  "metadata": {
+    "description": "Enable unlimited nested subagents in Claude Code"
+  },
   "plugins": [
     {
       "name": "nested",
-      "path": ".",
+      "source": ".",
       "description": "Enable nested subagents by spawning fresh Claude processes. Provides an MCP tool that bypasses the native Task tool's recursion limit, allowing subagents to spawn their own subagents."
     }
   ]
