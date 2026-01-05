@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 /**
  * Nested Subagent MCP Server - Streaming Edition
  *
@@ -186,10 +185,16 @@ interface TaskInput {
   addDirs?: string[];
 }
 
+interface ToolOutput {
+  tool: string;
+  output: string;
+}
+
 interface ProgressState {
   toolUseCount: number;
   currentToolUse: string | null;
   startTime: number;
+  toolOutputs: ToolOutput[];
 }
 
 // Create MCP server
@@ -231,7 +236,7 @@ function formatDuration(ms: number): string {
 async function runTask(
   input: TaskInput,
   progressToken?: string | number,
-): Promise<{ success: boolean; result?: string; error?: string; usage?: object; toolUseCount?: number; duration?: number; tokens?: number }> {
+): Promise<{ success: boolean; result?: string; error?: string; usage?: object; toolUseCount?: number; duration?: number; tokens?: number; toolOutputs?: ToolOutput[] }> {
   const {
     prompt,
     model = "sonnet",
@@ -251,6 +256,7 @@ async function runTask(
     toolUseCount: 0,
     currentToolUse: null,
     startTime: Date.now(),
+    toolOutputs: [],
   };
 
   // Build CLI arguments - matching native Task tool capabilities
@@ -394,17 +400,27 @@ async function runTask(
             break;
 
           case "user":
-            // Tool result - emit progress
-            if (msg.tool_use_result && progressToken !== undefined) {
-              const resultPreview = msg.tool_use_result.stdout?.slice(0, 50) || "(no output)";
-              server.notification({
-                method: "notifications/progress",
-                params: {
-                  progressToken,
-                  progress: state.toolUseCount,
-                  message: `Result: ${resultPreview}${(msg.tool_use_result.stdout?.length ?? 0) > 50 ? "..." : ""}`,
-                },
-              });
+            // Tool result - capture output and emit progress
+            if (msg.tool_use_result) {
+              const stdout = msg.tool_use_result.stdout || "";
+              // Capture tool output for final result
+              if (stdout && state.currentToolUse) {
+                state.toolOutputs.push({
+                  tool: state.currentToolUse,
+                  output: stdout,
+                });
+              }
+              if (progressToken !== undefined) {
+                const resultPreview = stdout.slice(0, 50) || "(no output)";
+                server.notification({
+                  method: "notifications/progress",
+                  params: {
+                    progressToken,
+                    progress: state.toolUseCount,
+                    message: `Result: ${resultPreview}${stdout.length > 50 ? "..." : ""}`,
+                  },
+                });
+              }
             }
             break;
 
@@ -472,6 +488,7 @@ async function runTask(
           toolUseCount: state.toolUseCount,
           duration,
           tokens: totalTokens,
+          toolOutputs: state.toolOutputs,
         });
       } else if (code === 0) {
         resolve({
@@ -480,6 +497,7 @@ async function runTask(
           toolUseCount: state.toolUseCount,
           duration,
           tokens: 0,
+          toolOutputs: state.toolOutputs,
         });
       } else {
         resolve({
@@ -539,11 +557,25 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const durationText = formatDuration(result.duration ?? 0);
     const summary = `Done (${toolUseText} · ${tokensText} · ${durationText})`;
 
+    // Format tool outputs for display (similar to native Task tool)
+    let toolOutputsText = '';
+    if (result.toolOutputs && result.toolOutputs.length > 0) {
+      toolOutputsText = result.toolOutputs
+        .map(to => `[${to.tool}]\n${to.output}`)
+        .join('\n\n');
+    }
+
+    // Build final output: tool outputs + result + summary
+    const parts: string[] = [];
+    if (toolOutputsText) parts.push(toolOutputsText);
+    if (result.result) parts.push(result.result);
+    parts.push(summary);
+
     return {
       content: [
         {
           type: "text",
-          text: summary,
+          text: parts.join('\n\n'),
         },
       ],
     };
