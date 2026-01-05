@@ -40,6 +40,42 @@ claude --plugin-dir /path/to/nested-subagent
 | Agent | `nested-task` | Orchestrates nested subagent workflows |
 | Skill | `nested-subagent` | Model-invoked capability for multi-level nesting |
 
+## Example
+
+```
+> I would like you to print numbers 1-10 using node cli.
+  Then do it again via the subagent
+  Then do it again from a subagent within the subagent.
+
+● I'll do this in three steps: directly, via a subagent, and via a nested subagent.
+
+  Step 1: Direct node CLI
+
+● Bash(node -e "for(let i=1; i<=10; i++) console.log(i)")
+  ⎿  1
+     2
+     3
+     … +7 lines
+
+  Step 2: Via subagent
+
+● Task(Print 1-10 with node)
+  ⎿  Done (1 tool use · 30.2k tokens · 15s)
+
+  Step 3: Via nested subagent (subagent within subagent)
+
+● plugin:nested:subagent - Task (MCP)(prompt: "Spawn your own subagent to print 1-10")
+  ⎿  Done (2 tool uses · 68.4k tokens · 27s)
+
+● All three completed successfully:
+
+  | Level | Method                                     | Result          |
+  |-------|------------------------------------------- |-----------------|
+  | 1     | Direct node -e                             | ✅ Printed 1-10 |
+  | 2     | Task tool subagent                         | ✅ Printed 1-10 |
+  | 3     | Nested subagent (spawned its own subagent) | ✅ Completed    |
+```
+
 ## Usage
 
 Claude automatically uses the nested subagent tool when your task requires multi-level delegation:
