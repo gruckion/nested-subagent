@@ -3,9 +3,7 @@
   "owner": {
     "name": "gruckion"
   },
-  "metadata": {
-    "description": "Fallback agent with full tool access for unlimited nesting"
-  },
+  "description": "Fallback agent with full tool access for unlimited nesting",
   "plugins": [
     {
       "name": "fallback-agent",
